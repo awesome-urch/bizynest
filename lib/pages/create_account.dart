@@ -103,19 +103,157 @@ class CreateAccountPage extends StatelessWidget{
   List<DropdownMenuItem<int>> stateList = [];
 
   void loadStateList() {
-    stateList = [];
-    stateList.add(new DropdownMenuItem(
+    stateList = [
+      DropdownMenuItem(
+        child: new Text('Abuja'),
+        value: 0,
+      ),
+      DropdownMenuItem(
+        child: new Text('Abia'),
+        value: 1,
+      ),
+      DropdownMenuItem(
+        child: new Text('Adamawa'),
+        value: 2,
+      ),
+      DropdownMenuItem(
+        child: new Text('Akwa Ibom'),
+        value: 3,
+      ),
+      DropdownMenuItem(
+        child: new Text('Anambra'),
+        value: 4,
+      ),
+      DropdownMenuItem(
+        child: new Text('Bauchi'),
+        value: 5,
+      ),
+      DropdownMenuItem(
+        child: new Text('Bayelsa'),
+        value: 6,
+      ),
+      DropdownMenuItem(
+        child: new Text('Benue'),
+        value: 7,
+      ),
+      DropdownMenuItem(
+        child: new Text('Borno'),
+        value: 8,
+      ),
+      DropdownMenuItem(
+        child: new Text('Cross River'),
+        value: 9,
+      ),
+      DropdownMenuItem(
+        child: new Text('Delta'),
+        value: 10,
+      ),
+      DropdownMenuItem(
+        child: new Text('Ebonyi'),
+        value: 11,
+      ),
+      DropdownMenuItem(
+        child: new Text('Ekiti'),
+        value: 12,
+      ),
+      DropdownMenuItem(
+        child: new Text('Edo'),
+        value: 13,
+      ),
+      DropdownMenuItem(
+        child: new Text('Enugu'),
+        value: 14,
+      ),
+      DropdownMenuItem(
+        child: new Text('Gombe'),
+        value: 15,
+      ),
+      DropdownMenuItem(
+        child: new Text('Imo'),
+        value: 16,
+      ),
+      DropdownMenuItem(
+        child: new Text('Jigawa'),
+        value: 17,
+      ),
+      DropdownMenuItem(
+        child: new Text('Kaduna'),
+        value: 18,
+      ),
+      DropdownMenuItem(
+        child: new Text('Kano'),
+        value: 19,
+      ),
+      DropdownMenuItem(
+        child: new Text('Katsina'),
+        value: 20,
+      ),
+      DropdownMenuItem(
+        child: new Text('Kebbi'),
+        value: 21,
+      ),
+      DropdownMenuItem(
+        child: new Text('Kogi'),
+        value: 22,
+      ),
+      DropdownMenuItem(
+        child: new Text('Kwara'),
+        value: 23,
+      ),
+      DropdownMenuItem(
+        child: new Text('Lagos'),
+        value: 24,
+      ),
+      DropdownMenuItem(
+        child: new Text('Nasarawa'),
+        value: 25,
+      ),
+      DropdownMenuItem(
+        child: new Text('Niger'),
+        value: 26,
+      ),
+      DropdownMenuItem(
+        child: new Text('Ogun'),
+        value: 27,
+      ),
+      DropdownMenuItem(
+        child: new Text('Osun'),
+        value: 28,
+      ),
+      DropdownMenuItem(
+        child: new Text('Oyo'),
+        value: 29,
+      ),
+      DropdownMenuItem(
+        child: new Text('Plateau'),
+        value: 30,
+      ),
+      DropdownMenuItem(
+        child: new Text('Rivers'),
+        value: 31,
+      ),
+      DropdownMenuItem(
+        child: new Text('Sokoto'),
+        value: 32,
+      ),
+      DropdownMenuItem(
+        child: new Text('Taraba'),
+        value: 33,
+      ),
+      DropdownMenuItem(
+        child: new Text('Yobe'),
+        value: 34,
+      ),
+      DropdownMenuItem(
+        child: new Text('Zamfara'),
+        value: 35,
+      ),
+    ];
+    /*stateList.add(new DropdownMenuItem(
       child: new Text('Abuja'),
       value: 0,
-    ));
-    stateList.add(new DropdownMenuItem(
-      child: new Text('Abia'),
-      value: 1,
-    ));
-    stateList.add(new DropdownMenuItem(
-      child: new Text('Adamawa'),
-      value: 2,
-    ));
+    ));*/
+
   }
 
   int _selectedState = 0;

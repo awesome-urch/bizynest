@@ -278,7 +278,7 @@ class LoginPage extends StatelessWidget {
             // run through the reducer. After the reducer updates the state,
             // the Widget will be automatically rebuilt with the latest
             // count. No need to manually manage subscriptions or Streams!
-            new Counter(),
+            //new Counter(),
             // Connect the Store to a FloatingActionButton. In this case, we'll
             // use the Store to build a callback that will dispatch an Increment
             // Action.
@@ -290,7 +290,7 @@ class LoginPage extends StatelessWidget {
 
         ),
       ),
-      floatingActionButton: new IncreaseCountButton(),
+      //floatingActionButton: new IncreaseCountButton(),
     );
   }
 }
