@@ -8,16 +8,18 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:bizynest/models/category_model.dart';
 import 'package:bizynest/widgets/list_category.dart';
+import 'package:bizynest/services/rest_api.dart';
 
 Future<List<MyCategory>> fetchPosts(http.Client client) async {
   //https://jsonplaceholder.typicode.com/photos
   //https://bizynest.com/api/src/routes/process_one.php?request=categories
   //http://192.168.0.100/pagesn/process_one.php?request=categories2
-  final response = await client.get('http://192.168.0.100/pagesn/process_one.php?request=categories');
+  final response = await client.get(RestApi.REST_URL_GET + '?request=categories');
 
   //print(response.body);
   final body = json.decode(response.body);
   /*print(body['data']);
+
 
   if(body['data']){
     final String data = body['data'];
@@ -94,12 +96,18 @@ class PhotosList extends StatelessWidget {
 
 
 
-class CreateAccountPage extends StatelessWidget{
+class CreateAccountPage extends StatefulWidget{
   final String title;
   //final Store<int> store;
 
   CreateAccountPage({Key key, this.title, }) : super(key: key);
 
+  @override
+  _CreateAccountPageState createState() => _CreateAccountPageState();
+
+}
+
+class _CreateAccountPageState extends State<CreateAccountPage>{
   List<DropdownMenuItem<int>> stateList = [];
 
   void loadStateList() {
@@ -258,12 +266,20 @@ class CreateAccountPage extends StatelessWidget{
 
   int _selectedState = 0;
 
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController surnameController = TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPwdController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final surnameController = TextEditingController();
+  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPwdController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the Widget is removed from the Widget tree
+    firstNameController.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +298,7 @@ class CreateAccountPage extends StatelessWidget{
           decoration: InputDecoration(
             contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey[300]),
+            hintStyle: TextStyle(color: Colors.grey[500]),
             border:
             OutlineInputBorder(borderRadius: BorderRadius.circular(4.0)),
           )
@@ -322,141 +338,142 @@ class CreateAccountPage extends StatelessWidget{
 
 
     Widget footSection = Container(
-      margin: EdgeInsets.all(20.0),
-      child: Row(
-        children: <Widget>[
-          Container(
-            margin: EdgeInsets.all(10.0),
-            child: Text('Already have an account?',style: TextStyle(color:Colors.white, fontSize: 20),),
-          ),
-          Container(
-            margin: EdgeInsets.all(10.0),
-            child: commonWidgets.buildButtonMaterial(
-                label: 'Sign in',
-                color: Colors.white,
-                textColor: AppConstants.appPurple,
-                minWidth: 50.0,
-                callback:
-                    () async {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      // builder methods always take context!
-                      builder: (context) {
-                        return LoginPage();
-                      },
-                    ),
-                  );
-                }
+        margin: edgeInsets,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              /*margin: EdgeInsets.all(10.0),*/
+              child: Text('Already have an account?',style: TextStyle(color:Colors.white, fontSize: 20),),
             ),
-          )
-          /*Container(
+            Expanded(
+              //margin: EdgeInsets.all(10.0),
+              child: commonWidgets.buildButtonMaterial(
+                  label: 'Sign in',
+                  color: Colors.white,
+                  textColor: AppConstants.appPurple,
+                  minWidth: 50.0,
+                  callback:
+                      () async {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        // builder methods always take context!
+                        builder: (context) {
+                          return LoginPage();
+                        },
+                      ),
+                    );
+                  }
+              ),
+            )
+            /*Container(
             child: commonWidgets.buildButtonMaterial(label: 'Sign in',color: Colors.white, textColor: AppConstants.appPurple),
           ),*/
-        ],
-      )
+          ],
+        )
     );
 
 
     return Scaffold(
         appBar: AppBar(
-        // Here we take the value from the LoginPage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text('Create Account'),
-      ),
+          // Here we take the value from the LoginPage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Text('Create Account'),
+        ),
         body: Container(
-          decoration: BoxDecoration(
-            // Box decoration takes a gradient
-            gradient: LinearGradient(
-              // Where the linear gradient begins and ends
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-              // Add one stop for each color. Stops should increase from 0 to 1
-              stops: [0.1, 0.7],
-              colors: [
-                // Colors are easy thanks to Flutter's Colors class.
+            decoration: BoxDecoration(
+              // Box decoration takes a gradient
+              gradient: LinearGradient(
+                // Where the linear gradient begins and ends
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                // Add one stop for each color. Stops should increase from 0 to 1
+                stops: [0.1, 0.7],
+                colors: [
+                  // Colors are easy thanks to Flutter's Colors class.
 
-                new Color(0xFF601183),
-                new Color(0x88601183),
-              ],
-            ),
-          ),
-          child:
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Expanded(
-                child: ListView(
-                    children:[
-                      Container(
-                        padding: EdgeInsets.fromLTRB(32.0, 48.0, 32.0, 24.0),
-                        child:Image.asset(
-                          "assets/logo_extended.png",
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      firstNameInputField,
-                      surnameInputField,
-                      usernameInputField,
-                      emailInputField,
-                      pwdInputField,
-                      cpwdInputField,
-                      Container(
-                        margin: EdgeInsets.fromLTRB(28.0, 20.0, 28.0, 0.0),
-                        child:Text("Select Location", style: TextStyle(color: Colors.white),),
-                      ),
-                      Container(
-                          margin: edgeInsets,
-                          child:
-                          DropdownButton(
-                            hint: new Text('Select State'),
-                            items: stateList,
-                            value: _selectedState,
-
-                            onChanged: (value) {
-                              print(value);
-                              _selectedState = value;
-                            },
-                            isExpanded: true,
-                          )
-
-                      ),
-                      Container(
-                        margin: EdgeInsets.fromLTRB(28.0, 20.0, 28.0, 0.0),
-                        child:Text("Select Interest", style: TextStyle(color: Colors.white),),
-                      ),
-                      Container(
-                        margin: edgeInsets,
-                        height: 200,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            Expanded(
-                              child:FutureBuilder<List<MyCategory>>(
-                                future: fetchPosts(http.Client()),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasError) print(snapshot.error);
-
-                                  return snapshot.hasData
-                                  //new Map<String, dynamic>.from(snapshot.value)
-                                      ? ListViewCategories(posts: snapshot.data)
-                                  //? ListViewCategories(posts: snapshot.data)
-                                      : Center(child: CircularProgressIndicator());
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        margin: edgeInsets,
-                        //child: _buildButtonMaterial(context: context, label: 'Complete Registration',color: new Color(0xff1565c0)), //new Color(0xff1565c0)
-                        child: commonWidgets.buildButtonMaterial(label: 'Complete Registration',color: AppConstants.appBlue),
-                      ),
-                      footSection,
-                    ]
-                ),
+                  new Color(0xFF601183),
+                  new Color(0x88601183),
+                ],
               ),
-              /*Expanded(
+            ),
+            child:
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Expanded(
+                  child: ListView(
+                      children:[
+                        Container(
+                          padding: EdgeInsets.fromLTRB(32.0, 48.0, 32.0, 24.0),
+                          child:Image.asset(
+                            "assets/logo_extended.png",
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        firstNameInputField,
+                        surnameInputField,
+                        usernameInputField,
+                        emailInputField,
+                        pwdInputField,
+                        cpwdInputField,
+                        Container(
+                          margin: EdgeInsets.fromLTRB(28.0, 20.0, 28.0, 0.0),
+                          child:Text("Select Location", style: TextStyle(color: Colors.white),),
+                        ),
+                        Container(
+                            margin: edgeInsets,
+                            child:
+                            DropdownButton(
+                              hint: new Text('Select State'),
+                              items: stateList,
+                              value: _selectedState,
+
+                              onChanged: (value) {
+                                print(value);
+                                _selectedState = value;
+                              },
+                              isExpanded: true,
+                            )
+
+                        ),
+                        Container(
+                          margin: EdgeInsets.fromLTRB(28.0, 20.0, 28.0, 0.0),
+                          child:Text("Select Interest", style: TextStyle(color: Colors.white),),
+                        ),
+                        Container(
+                          margin: edgeInsets,
+                          height: 200,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              Expanded(
+                                child:FutureBuilder<List<MyCategory>>(
+                                  future: fetchPosts(http.Client()),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError) print(snapshot.error);
+
+                                    return snapshot.hasData
+                                    //new Map<String, dynamic>.from(snapshot.value)
+                                        ? ListViewCategories(posts: snapshot.data)
+                                    //? ListViewCategories(posts: snapshot.data)
+                                        : Center(child: CircularProgressIndicator());
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: edgeInsets,
+                          //child: _buildButtonMaterial(context: context, label: 'Complete Registration',color: new Color(0xff1565c0)), //new Color(0xff1565c0)
+                          child: commonWidgets.buildButtonMaterial(label: 'Complete Registration',color: AppConstants.appBlue),
+                        ),
+                        footSection,
+                      ]
+                  ),
+                ),
+                /*Expanded(
                 child:FutureBuilder<List<MyCategory>>(
                   future: fetchPosts(http.Client()),
                   builder: (context, snapshot) {
@@ -471,8 +488,8 @@ class CreateAccountPage extends StatelessWidget{
                 ),
               ),*/
 
-            ],
-          )
+              ],
+            )
           /*child: ListView(
             children:[
               Container(
@@ -544,5 +561,4 @@ class CreateAccountPage extends StatelessWidget{
         )
     );
   }
-
 }

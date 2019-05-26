@@ -1,3 +1,6 @@
+import 'package:bizynest/models/post_model.dart';
+import 'package:bizynest/pages/home.dart';
+import 'package:bizynest/services/rest_api.dart';
 import 'package:flutter/material.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -10,16 +13,25 @@ import 'package:bizynest/actions/auth_actions.dart';
 import 'package:bizynest/pages/create_account.dart';
 import 'package:bizynest/widgets/common_widgtes.dart';
 import 'package:bizynest/pages/forgot_password.dart';
-
+import 'package:bizynest/helpers/validator_methods.dart';
+import 'package:bizynest/constants.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
+import 'package:bizynest/constants.dart';
 
 // One simple action: Increment
 //enum Actions { Increment }
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   final String title;
+
   //final Store<int> store;
 
   LoginPage({Key key, this.title, }) : super(key: key);
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -33,9 +45,38 @@ class LoginPage extends StatelessWidget {
 
   /*@override
   _LoginPageState createState() => _LoginPageState();*/
+}
 
-  TextEditingController usernameController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+
+class _LoginPageState extends State<LoginPage> {
+
+  bool _processing = false;
+  bool _nameError = false;
+  bool _nameEmpty = false;
+  bool _pwdEmpty = false;
+
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  Future<String> createPost(http.Client client) async{
+    print('processing');
+    setState(() {
+      _processing = true;
+    });
+
+    final response = await http.get(RestApi.REST_URL_GET + "?request=login&username=" + usernameController.text + "&password=" + passwordController.text);
+
+    setState(() {
+      _processing = false;
+    });
+
+    //String s = jsonEncode(response.body);
+    //print('res: '+response.body);
+    //return postFromJson(response.body);
+    return response.body;
+    //return json.decode(response.body);
+    //return json.decode(s);
+  }
 
 
   @override
@@ -68,6 +109,88 @@ class LoginPage extends StatelessWidget {
       );
     }*/
 
+    _process(BuildContext ctx) {
+      if (usernameController.text.isEmpty) {
+        setState(() {
+          _nameEmpty = true;
+        });
+        return;
+      }else{
+        setState(() {
+          _nameEmpty = false;
+        });
+      }
+      if (passwordController.text.isEmpty) {
+        setState(() {
+          _pwdEmpty = true;
+        });
+        return;
+      }else{
+        setState(() {
+          _pwdEmpty = false;
+        });
+      }
+
+      createPost(http.Client()).then((response){
+
+        print('api brought $response');
+
+        Map map = jsonDecode(response);
+        //var obj = new ApiResponse.fromJson(map);
+        int err = map['error'];
+
+        if(err == 0){
+
+          String d = map['data']['surname'];
+          print(d);
+          /*Map dmap = jsonDecode(d);
+          String id = dmap['merchant_id'];
+          print(id);*/
+
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              // builder methods always take context!
+              builder: (context) {
+                return HomePage();
+              },
+            ),
+          );
+
+        }else{
+          final snk = commonWidgets.buildSnackBar(action: false,text: 'Invalid username or password');
+          Scaffold.of(ctx).showSnackBar(snk);
+        }
+
+      }).catchError((error){
+        print('error : $error');
+
+        final snk = commonWidgets.buildSnackBar(action: false,text: 'An error occurred');
+        Scaffold.of(ctx).showSnackBar(snk);
+
+      });
+    }
+
+    void _testFn(){
+      print(30);
+    }
+
+      void toRegister(){
+        // Navigator.of(context) accesses the current app's navigator.
+        // Navigators can 'push' new routes onto the stack,
+        // as well as pop routes off the stack.
+        //
+        // This is the easiest way to build a new page on the fly
+        // and pass that page some state from the current page.
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            // builder methods always take context!
+            builder: (context) {
+              return CreateAccountPage();
+            },
+          ),
+        );
+      }
+
     Widget textIntroSection = Container(
       padding: edgeInsets,
       child: Text(
@@ -78,24 +201,24 @@ class LoginPage extends StatelessWidget {
     );
 
     Widget forgotPwd = Container(
-      padding: edgeInsets,
-      child: InkWell(
-        onTap: () async {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              // builder methods always take context!
-              builder: (context) {
-                return ForgotPasswordPage();
-              },
-            ),
-          );
-        },
-        child: Text(
-          'Forgot your password?',
-          softWrap: true,
-          style: TextStyle(color: Colors.grey[300]),
-        ),
-      )
+        padding: edgeInsets,
+        child: InkWell(
+          onTap: () async {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                // builder methods always take context!
+                builder: (context) {
+                  return ForgotPasswordPage();
+                },
+              ),
+            );
+          },
+          child: Text(
+            'Forgot your password?',
+            softWrap: true,
+            style: TextStyle(color: Colors.grey[300]),
+          ),
+        )
     );
 
     Widget userNameInputField = Container(
@@ -108,7 +231,8 @@ class LoginPage extends StatelessWidget {
           decoration: InputDecoration(
             contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
             hintText: "Username",
-            hintStyle: TextStyle(color: Colors.grey[300]),
+            hintStyle: TextStyle(color: Colors.grey[500]),
+            errorText: _nameEmpty?'Enter your username':null,
             border:
             OutlineInputBorder(borderRadius: BorderRadius.circular(4.0)),
           )
@@ -122,13 +246,14 @@ class LoginPage extends StatelessWidget {
           obscureText: true,
           controller: passwordController,
           //onChanged: (v) {
-            //passwordController.text = v;
-            //print(v);
+          //passwordController.text = v;
+          //print(v);
           //},
           decoration: InputDecoration(
             contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
             hintText: "Password",
-            hintStyle: TextStyle(color: Colors.grey[300]),
+            hintStyle: TextStyle(color: Colors.grey[500]),
+            errorText: _pwdEmpty?'Enter your password':null,
             border:
             OutlineInputBorder(borderRadius: BorderRadius.circular(4.0)),
           )
@@ -152,50 +277,102 @@ class LoginPage extends StatelessWidget {
         ]
     );
 
-    void _testFn(){
-      print(30);
-    }
+    Widget loginBtn = Builder(
+      // Create an inner BuildContext so that the onPressed methods
+      // can refer to the Scaffold with Scaffold.of().
+        builder: (BuildContext context) {
+          return Material(
+            elevation: 5.0,
+            borderRadius: BorderRadius.circular(0.0),
+            color: AppConstants.appBlue,
+            child: MaterialButton(
+              minWidth: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+              onPressed: ()=>_process(context),
+              /*onPressed: (){
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Have a snack!'),
+                  ),
+                );
+              },*/
+              child: Text('Login',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0)),
+            ),
+          );
+        }
+    );
 
-    void _checkInputs(BuildContext context){
-      if(usernameController.text.isEmpty){
-        Scaffold.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.redAccent,
-            content: Text('Enter your username'),
+    Widget stack1 = Stack(
+      children: <Widget>[
+        Container(
+          child: ListView(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.fromLTRB(32.0, 48.0, 32.0, 24.0),
+                child:Image.asset(
+                  "assets/logo_extended.png",
+                  fit: BoxFit.contain,
+                ),
+              ),
+              textIntroSection,
+              userNameInputField,
+              passwordInputField,
+              forgotPwd,
+              Container(
+                margin: edgeInsets,
+                child: loginBtn,
+              ),
+              Container(
+                  margin: EdgeInsets.fromLTRB(0.0, 24.0, 0.0, 24.0),
+                  child: orSection
+              ),
+              Container(
+                margin: edgeInsets,
+                //child: _buildButtonMaterial(label:'Create Account', color: new Color(0xff1565c0), callback: () {
+                //      () async => print(20);
+                //}),
+                child: commonWidgets.buildButtonMaterial(
+                    label:'Create Account',
+                    color: new Color(0xff1565c0),
+                    callback:
+                        () async {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          // builder methods always take context!
+                          builder: (context) {
+                            return CreateAccountPage();
+                          },
+                        ),
+                      );
+                    }
+                ),
+              ),
+
+            ],
+            // Center is a layout widget. It takes a single child and positions it
+            // in the middle of the parent.
+
           ),
-        );
-        return;
-      }
-      if(passwordController.text.isEmpty){
-        Scaffold.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.redAccent,
-            content: Text('Enter your password'),
-          ),
-        );
-        return;
-      }
+        ),
 
-      void toRegister(){
-        // Navigator.of(context) accesses the current app's navigator.
-        // Navigators can 'push' new routes onto the stack,
-        // as well as pop routes off the stack.
-        //
-        // This is the easiest way to build a new page on the fly
-        // and pass that page some state from the current page.
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            // builder methods always take context!
-            builder: (context) {
-              return CreateAccountPage();
-            },
-          ),
-        );
-      }
-
-
-
-    }
+        // Loading
+        Positioned(
+          child: _processing
+              ? Container(
+            child: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.lightBlueAccent),
+              ),
+            ),
+            color: Colors.white.withOpacity(0.8),
+          )
+              : Container(),
+        ),
+      ],
+    );
 
     return Scaffold(
       /*appBar: AppBar(
@@ -220,285 +397,9 @@ class LoginPage extends StatelessWidget {
             ],
           ),
         ),
-        child:ListView(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.fromLTRB(32.0, 48.0, 32.0, 24.0),
-              child:Image.asset(
-                "assets/logo_extended.png",
-                fit: BoxFit.contain,
-              ),
-            ),
-            textIntroSection,
-            userNameInputField,
-            passwordInputField,
-            forgotPwd,
-            Container(
-              margin: edgeInsets,
-              child: new AuthButtonContainer(
-                username: usernameController.text,
-                password: passwordController.text,
-              ),
-            ),
-            Container(
-                margin: EdgeInsets.fromLTRB(0.0, 24.0, 0.0, 24.0),
-                child: orSection
-            ),
-            Container(
-              margin: edgeInsets,
-              //child: _buildButtonMaterial(label:'Create Account', color: new Color(0xff1565c0), callback: () {
-              //      () async => print(20);
-              //}),
-              child: commonWidgets.buildButtonMaterial(
-                  label:'Create Account',
-                  color: new Color(0xff1565c0),
-                  callback:
-                    () async {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          // builder methods always take context!
-                          builder: (context) {
-                            return CreateAccountPage();
-                          },
-                        ),
-                      );
-                  }
-              ),
-            ),
-            // Connect the Store to a Text Widget that renders the current
-            // count.
-            //
-            // We'll wrap the Text Widget in a `StoreConnector` Widget. The
-            // `StoreConnector` will find the `Store` from the nearest
-            // `StoreProvider` ancestor, convert it into a String of the
-            // latest count, and pass that String  to the `builder` function
-            // as the `count`.
-            //
-            // Every time the button is tapped, an action is dispatched and
-            // run through the reducer. After the reducer updates the state,
-            // the Widget will be automatically rebuilt with the latest
-            // count. No need to manually manage subscriptions or Streams!
-            //new Counter(),
-            // Connect the Store to a FloatingActionButton. In this case, we'll
-            // use the Store to build a callback that will dispatch an Increment
-            // Action.
-            //
-            // Then, we'll pass this callback to the button's `onPressed` handler.
-          ],
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-
-        ),
+        child:stack1,
       ),
       //floatingActionButton: new IncreaseCountButton(),
     );
   }
 }
-
-
-/*
-class _LoginPageState extends State<LoginPage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-
-    const EdgeInsets edgeInsets = EdgeInsets.fromLTRB(32.0, 24.0, 32.0, 24.0);
-
-    Material _buildButtonMaterial(String label, Color color){
-      return Material(
-        elevation: 5.0,
-        borderRadius: BorderRadius.circular(0.0),
-        color: color,
-        child: MaterialButton(
-          minWidth: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-          onPressed: () {},
-          child: Text(label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0)),
-        ),
-      );
-    }
-
-    Widget textIntroSection = Container(
-      padding: edgeInsets,
-      child: Text(
-        'Log in to get in touch with exotic businesses around you. ',
-        softWrap: true,
-        style: TextStyle(color:Colors.white),
-      ),
-    );
-
-    Widget forgotPwd = Container(
-      padding: edgeInsets,
-      child: Text(
-        'Forgot your password?',
-        softWrap: true,
-        style: TextStyle(color: Colors.grey[300]),
-      ),
-    );
-
-    Widget userNameInputField = Container(
-      padding: edgeInsets,
-      child: TextField(
-          style: TextStyle(color: Colors.white),
-          obscureText: true,
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-            hintText: "Username",
-            hintStyle: TextStyle(color: Colors.grey[300]),
-              border:
-              OutlineInputBorder(borderRadius: BorderRadius.circular(4.0)),
-          )
-      ),
-    );
-
-    Widget passwordInputField = Container(
-      padding: edgeInsets,
-      child: TextField(
-          style: TextStyle(color: Colors.white),
-          obscureText: true,
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-            hintText: "Password",
-            hintStyle: TextStyle(color: Colors.grey[300]),
-            border:
-            OutlineInputBorder(borderRadius: BorderRadius.circular(4.0)),
-          )
-      ),
-    );
-
-    Widget orSection = Row(
-        children: <Widget>[
-          Expanded(
-              child: Divider(color: Colors.grey[300],)
-          ),
-
-          Container(
-            padding: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
-            child: Text("OR", style: TextStyle(color:Colors.white,)),
-          ),
-
-          Expanded(
-              child: Divider(color: Colors.grey[300],)
-          ),
-        ]
-    );
-
-
-
-    return Scaffold(
-
-      body: Container(
-        decoration: BoxDecoration(
-          // Box decoration takes a gradient
-          gradient: LinearGradient(
-            // Where the linear gradient begins and ends
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            // Add one stop for each color. Stops should increase from 0 to 1
-            stops: [0.1, 0.7],
-            colors: [
-              // Colors are easy thanks to Flutter's Colors class.
-
-              new Color(0xFF601183),
-              new Color(0x88601183),
-            ],
-          ),
-        ),
-        child:ListView(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.fromLTRB(32.0, 48.0, 32.0, 24.0),
-              child:Image.asset(
-                "assets/logo_extended.png",
-                fit: BoxFit.contain,
-              ),
-            ),
-            textIntroSection,
-            userNameInputField,
-            passwordInputField,
-            forgotPwd,
-            Container(
-              margin: edgeInsets,
-              child: _buildButtonMaterial('Login', new Color(0xff1565c0)),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(0.0, 24.0, 0.0, 24.0),
-              child: orSection
-            ),
-            Container(
-              margin: edgeInsets,
-              child: _buildButtonMaterial('Create Account', new Color(0xff1565c0)),
-            ),
-            // Connect the Store to a Text Widget that renders the current
-            // count.
-            //
-            // We'll wrap the Text Widget in a `StoreConnector` Widget. The
-            // `StoreConnector` will find the `Store` from the nearest
-            // `StoreProvider` ancestor, convert it into a String of the
-            // latest count, and pass that String  to the `builder` function
-            // as the `count`.
-            //
-            // Every time the button is tapped, an action is dispatched and
-            // run through the reducer. After the reducer updates the state,
-            // the Widget will be automatically rebuilt with the latest
-            // count. No need to manually manage subscriptions or Streams!
-            StoreConnector<int, String>(
-              converter: (store) => store.state.toString(),
-              builder: (context, count) {
-                return new Text(
-                  count,
-                  style: Theme.of(context).textTheme.display1,
-                );
-              },
-            ),
-      // Connect the Store to a FloatingActionButton. In this case, we'll
-      // use the Store to build a callback that will dispatch an Increment
-      // Action.
-      //
-      // Then, we'll pass this callback to the button's `onPressed` handler.
-          ],
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-
-        ),
-      ),
-      floatingActionButton: new StoreConnector<int, VoidCallback>(
-        converter: (store) {
-          // Return a `VoidCallback`, which is a fancy name for a function
-          // with no parameters. It only dispatches an Increment action.
-          return () => store.dispatch(Actions.Increment);
-        },
-        builder: (context, callback) {
-          return new FloatingActionButton(
-            // Attach the `callback` to the `onPressed` attribute
-            onPressed: callback,
-            tooltip: 'Increment',
-            child: new Icon(Icons.add),
-          );
-        },
-      ),
-    );
-  }
-}
-*/
