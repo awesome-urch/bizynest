@@ -60,15 +60,23 @@ class _HomePageState extends State<HomePage>{
   static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     Text(
-      'Index 0: Home',
+      'Home',
       style: optionStyle,
     ),
     Text(
-      'Index 1: Business',
+      'Business Lounge',
       style: optionStyle,
     ),
     Text(
-      'Index 2: School',
+      'Display Port',
+      style: optionStyle,
+    ),
+    Text(
+      'Chat',
+      style: optionStyle,
+    ),
+    Text(
+      'Top Stores',
       style: optionStyle,
     ),
   ];
@@ -77,6 +85,7 @@ class _HomePageState extends State<HomePage>{
     setState(() {
       _selectedIndex = index;
     });
+    print(_selectedIndex);
   }
 
   @override
@@ -509,31 +518,47 @@ class _HomePageState extends State<HomePage>{
 
     var _bottomNav2 = new Theme(data:theme,child:_bottomNav);
 
+    Widget _homeColumn = Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Expanded(
+          child:FutureBuilder<List<Product>>(
+            future: fetchPosts(http.Client()),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) print(snapshot.error);
+
+              return snapshot.hasData
+              //new Map<String, dynamic>.from(snapshot.value)
+                  ? ListViewProducts(posts: snapshot.data)
+              //? ListViewCategories(posts: snapshot.data)
+                  : Center(child: CircularProgressIndicator());
+            },
+          ),
+        ),
+      ],
+    );
+
     Widget productSection = Container(
       margin: edgeInsets,
       height: 500,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+      child: _homeColumn,
+    );
+
+    Widget centerFirst = Center(child: _widgetOptions.elementAt(_selectedIndex));
+
+    Widget _homeContainer = Container(
+      child:Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           Expanded(
-            child:FutureBuilder<List<Product>>(
-              future: fetchPosts(http.Client()),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) print(snapshot.error);
-
-                return snapshot.hasData
-                //new Map<String, dynamic>.from(snapshot.value)
-                    ? ListViewProducts(posts: snapshot.data)
-                //? ListViewCategories(posts: snapshot.data)
-                    : Center(child: CircularProgressIndicator());
-              },
+            child: ListView(
+              children: <Widget>[productSection],
             ),
           ),
         ],
       ),
     );
 
-    Widget centerFirst = Center(child: Text('My Page!'));
 
 
 
@@ -546,18 +571,7 @@ class _HomePageState extends State<HomePage>{
           IconButton(icon: const Icon(Icons.search), onPressed: () {},)
         ],
       ),
-      body: Container(
-        child:Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Expanded(
-              child: ListView(
-                children: <Widget>[productSection],
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: _selectedIndex>0?centerFirst:_homeContainer,
       drawer: _navDrawer,
       bottomNavigationBar: _bottomNav2,
     );

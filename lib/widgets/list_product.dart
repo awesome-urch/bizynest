@@ -12,6 +12,42 @@ class ListViewProducts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
+    Widget contain01 = GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+      ),
+      itemCount: posts.length,
+      itemBuilder: (context, position) {
+        return Card(
+          child: Column(
+            //mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              //Image.network(AppConstants.BASE_WEBSITE + posts[position].pphoto),
+              ListTile(
+                //leading: Icon(Icons.album),
+                title: Text('${posts[position].pname}'),
+                subtitle: Text('${posts[position].store_uid}'),
+              ),
+              ButtonTheme.bar( // make buttons use the appropriate styles for cards
+                child: ButtonBar(
+                  children: <Widget>[
+                    /*FlatButton(
+                      child: Text('BUY TICKETS'),
+                      onPressed: () { },
+                    ),*/
+                    FlatButton(
+                      child: Text('Negotiate'),
+                      onPressed: () { /* ... */ },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
     Widget contain0 = GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -99,7 +135,7 @@ class ListViewProducts extends StatelessWidget {
           }),
     );
 
-    return contain0;
+    return contain01;
   }
 
   void _onTapItem(BuildContext context, Product post) {

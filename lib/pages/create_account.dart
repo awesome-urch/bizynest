@@ -373,6 +373,34 @@ class _CreateAccountPageState extends State<CreateAccountPage>{
         )
     );
 
+    Widget btnReloadCats = Builder(
+      // Create an inner BuildContext so that the onPressed methods
+      // can refer to the Scaffold with Scaffold.of().
+        builder: (BuildContext context) {
+          return Material(
+            elevation: 5.0,
+            borderRadius: BorderRadius.circular(0.0),
+            color: AppConstants.appPurple,
+            child: MaterialButton(
+              minWidth: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+              onPressed: ()=>{},
+              /*onPressed: (){
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Have a snack!'),
+                  ),
+                );
+              },*/
+              child: Text('Reload',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0)),
+            ),
+          );
+        }
+    );
+
 
     return Scaffold(
         appBar: AppBar(
@@ -451,13 +479,20 @@ class _CreateAccountPageState extends State<CreateAccountPage>{
                                 child:FutureBuilder<List<MyCategory>>(
                                   future: fetchPosts(http.Client()),
                                   builder: (context, snapshot) {
-                                    if (snapshot.hasError) print(snapshot.error);
+                                    if (snapshot.hasError){
+                                      return Center(child:Column(
+                                        children: <Widget>[
+                                          Text('An error occurred'),
+                                          btnReloadCats
+                                        ],
+                                      ));
+                                    }
+                                    if(snapshot.hasData){
+                                      return ListViewCategories(posts: snapshot.data);
+                                    }else{
+                                      return Center(child: CircularProgressIndicator());
+                                    }
 
-                                    return snapshot.hasData
-                                    //new Map<String, dynamic>.from(snapshot.value)
-                                        ? ListViewCategories(posts: snapshot.data)
-                                    //? ListViewCategories(posts: snapshot.data)
-                                        : Center(child: CircularProgressIndicator());
                                   },
                                 ),
                               ),

@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   Future<String> createPost(http.Client client) async{
-    print('processing');
+
     setState(() {
       _processing = true;
     });
@@ -159,6 +159,11 @@ class _LoginPageState extends State<LoginPage> {
         }
 
       }).catchError((error){
+
+        setState(() {
+          _processing = false;
+        });
+
         print('error : $error');
 
         final snk = commonWidgets.buildSnackBar(action: false,text: 'An error occurred');
