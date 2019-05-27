@@ -8,6 +8,7 @@ class AppConstants{
   static final Color appPurple = new Color(0xFF601183);
 
   //REST API
+  static final String BASE_WEBSITE = "https://bizynest.com/";
   static final String BASE_URL = "https://bizynest.com/api/src/routes/";
   static final String PROCESS_GET = BASE_URL + "process_one.php?";
   static final String PROCESS_POST = BASE_URL + "process_post.php";

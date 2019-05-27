@@ -143,9 +143,6 @@ class _LoginPageState extends State<LoginPage> {
 
           String d = map['data']['surname'];
           print(d);
-          /*Map dmap = jsonDecode(d);
-          String id = dmap['merchant_id'];
-          print(id);*/
 
           Navigator.of(context).push(
             MaterialPageRoute(
