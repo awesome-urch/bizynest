@@ -539,7 +539,8 @@ class _HomePageState extends State<HomePage>{
     );
 
     Widget productSection = Container(
-      margin: edgeInsets,
+      //margin: edgeInsets,
+      margin: EdgeInsets.all(12),
       height: 500,
       child: _homeColumn,
     );
